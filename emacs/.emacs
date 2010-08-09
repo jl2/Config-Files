@@ -12,9 +12,7 @@
 (global-set-key "\C-\M-c" 'comment-region)
 (global-set-key "\C-\M-u" 'uncomment-region)
 (global-set-key [f5] 'revert-buffer)
-(global-set-key "\C-\M-g" 'web-search)
-(global-set-key "\C-\M-t" 'lookup-tri)
-(global-set-key "\C-\M-p" 'run-perl-one-liner)
+(global-set-key "\C-\M-p" 'replace-python-exp)
 (global-set-key [(control shift tab)] 'decrease-left-margin)
 (global-set-key [( control tab)] 'increase-left-margin)
 (global-set-key [?\C-.] 'next-error)
@@ -72,19 +70,29 @@
   ;; If there is more than one, they won't work right.
  '(backup-directory-alist (quote ((".*" . "~/.backups"))))
  '(c-default-style (quote ((c-mode . "k&r") (c++-mode . "java") (java-mode . "java") (awk-mode . "awk") (other . "gnu"))))
+ '(c-hanging-braces-alist (quote ((block-open after) (block-close . c-snug-do-while) (statement-cont) (substatement-open after) (brace-list-open) (brace-entry-open) (extern-lang-open after) (namespace-open after) (module-open after) (composition-open after) (inexpr-class-open after) (inexpr-class-close before) (arglist-cont-nonempty))))
  '(c-offsets-alist (quote ((substatement-open . 0) (substatement-open . 0) (access-label . -) (statement-case-open . 0))))
  '(compilation-scroll-output t)
  '(compilation-window-height 15)
+ '(describe-char-unidata-list (quote (name old-name general-category canonical-combining-class bidi-class decomposition decimal-digit-value digit-value numeric-value mirrored iso-10646-comment uppercase lowercase titlecase)))
+ '(column-number-mode t)
  '(grep-command "grep -i -n -e ")
  '(grep-window-height 15)
  '(indent-tabs-mode nil)
  '(show-paren-mode t)
+ '(size-indication-mode t)
  '(tab-stop-list (quote (4 8 12 16 20 24 28 32 36 40 44 48 52 56 60)))
  '(tab-width 4)
+ '(font-lock-maximum-size nil)
  '(tool-bar-mode nil)
  '(menu-bar-mode nil)
+ '(fill-column 100)
  '(transient-mark-mode nil)
- '(temp-buffer-max-height 15))
+ '(temp-buffer-max-height 15)
+ '(visible-cursor t)
+ '(which-func-modes t)
+ '(which-function-mode t)
+ '(shell-file-name "zsh"))
 
 (custom-set-faces
   ;; custom-set-faces was added by Custom.
@@ -97,11 +105,7 @@
  '(font-lock-comment-face ((((class color) (min-colors 88) (background dark)) (:foreground "OrangeRed3"))))
  '(font-lock-keyword-face ((((class color) (min-colors 88) (background dark)) (:foreground "SteelBlue"))))
  '(font-lock-string-face ((((class color) (min-colors 88) (background dark)) (:foreground "ForestGreen"))))
- '(font-lock-variable-name-face ((((class color) (min-colors 88) (background dark)) (:foreground "orange"))))
- '(mumamo-background-chunk-major ((((class color) (min-colors 88) (background dark)) (:background "gray30"))))
- '(mumamo-background-chunk-submode ((default nil) (nil (:background "grey20")))))
+ '(font-lock-variable-name-face ((((class color) (min-colors 88) (background dark)) (:foreground "orange")))))
 
 (setq frame-title-format
   '("" (buffer-file-name "%f" (dired-directory dired-directory "%b"))))
-
-
