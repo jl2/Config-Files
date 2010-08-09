@@ -6,6 +6,8 @@
         (foreground-color . "gray70")
         (background-color . "gray5")))
 
+(load "~/.emacs_stuff/my_functions.el")
+
 (global-set-key "\C-\M-j" 'goto-line)
 (global-set-key "\C-\M-c" 'comment-region)
 (global-set-key "\C-\M-u" 'uncomment-region)
@@ -24,6 +26,14 @@
 (global-set-key [?\M-\C-+] 'compile)
 (global-set-key [?\C-\]] 'match-paren)
 
+(global-set-key [f7] 'toggle-kbd-macro-recording-on)
+(global-set-key [f8] 'call-last-kbd-macro)
+
+(setq confirm-kill-emacs
+      (lambda (e)
+        (y-or-n-p-with-timeout
+         "Really exit Emacs (automatically exits in 15 secs)? " 15 t)))
+
 (add-to-list 'auto-mode-alist '("\\.\\([pP][Llm]\\|al\\)\\'" . perl-mode))
 (add-to-list 'interpreter-mode-alist '("perl" . perl-mode))
 (add-to-list 'interpreter-mode-alist '("perl5" . perl-mode))
@@ -39,6 +49,19 @@
 (setq inhibit-splash-screen t)
 (setq compilation-window-height 15)
 (setq grep-window-height 15)
+
+;; ;; Added to use tabs instead of spaces
+;; ;; Turn on tabs
+(setq indent-tabs-mode nil)
+(setq-default indent-tabs-mode nil)
+
+;; Set the tab width
+(setq tab-width 4)
+(setq c-basic-offset 4)
+
+(put 'downcase-region 'disabled nil)
+(fset 'yes-or-no-p 'y-or-n-p)
+
 
 (setq compile-command "make -k")
 
@@ -81,17 +104,4 @@
 (setq frame-title-format
   '("" (buffer-file-name "%f" (dired-directory dired-directory "%b"))))
 
-;; ;; Added to use tabs instead of spaces
-;; ;; Turn on tabs
-(setq indent-tabs-mode nil)
-(setq-default indent-tabs-mode nil)
 
-;; Set the tab width
-(setq tab-width 4)
-(setq c-basic-offset 4)
-
-(fset 'yes-or-no-p 'y-or-n-p)
-
-(load "~/.emacs_stuff/my_functions.el")
-
-(put 'downcase-region 'disabled nil)
