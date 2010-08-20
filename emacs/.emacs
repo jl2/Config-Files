@@ -27,6 +27,18 @@
 (global-set-key [f7] 'toggle-kbd-macro-recording-on)
 (global-set-key [f8] 'call-last-kbd-macro)
 
+(global-set-key [( control \) )] 'find-char)
+(global-set-key [( control \( )] 'find-char-backward)
+
+(global-set-key [( control meta \) )] 'find-char-before)
+(global-set-key [( control meta \( )] 'find-char-backward-after)
+
+(global-set-key [(control f9)]  'af-bookmark-toggle )
+(global-set-key [f9]  'af-bookmark-cycle-forward )
+(global-set-key [(shift f9)]  'af-bookmark-cycle-reverse )
+(global-set-key [(control shift f9)]  'af-bookmark-clear-all )
+
+
 (setq confirm-kill-emacs
       (lambda (e)
         (y-or-n-p-with-timeout
@@ -59,7 +71,6 @@
 
 (put 'downcase-region 'disabled nil)
 (fset 'yes-or-no-p 'y-or-n-p)
-
 
 (setq compile-command "make -k")
 

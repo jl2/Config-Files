@@ -1,4 +1,26 @@
 
+(defun find-char (chr)
+  "Similar to vim's f command"
+  (interactive "c")
+  (search-forward (char-to-string chr) nil 't))
+
+(defun find-char-backward (chr)
+  "Similar to vim's F command"
+  (interactive "c")
+  (search-backward (char-to-string chr) nil 't))
+
+(defun find-char-before (chr)
+  "Similar to vim's f command"
+  (interactive "c")
+  (search-forward (char-to-string chr) nil 't)
+  (backward-char))
+
+(defun find-char-backward-after (chr)
+  "Similar to vim's F command"
+  (interactive "c")
+  (search-backward (char-to-string chr) nil 't)
+  (forward-char))
+
 (defun match-paren (arg)
   "Go to the matching brace."
   (interactive "p")
