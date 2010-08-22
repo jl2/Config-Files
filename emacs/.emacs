@@ -38,7 +38,6 @@
 (global-set-key [(shift f9)]  'af-bookmark-cycle-reverse )
 (global-set-key [(control shift f9)]  'af-bookmark-clear-all )
 
-
 (setq confirm-kill-emacs
       (lambda (e)
         (y-or-n-p-with-timeout
@@ -70,6 +69,8 @@
 (setq c-basic-offset 4)
 
 (put 'downcase-region 'disabled nil)
+(put 'upcase-region 'disabled nil)
+
 (fset 'yes-or-no-p 'y-or-n-p)
 
 (setq compile-command "make -k")
@@ -110,7 +111,19 @@
   ;; If you edit it by hand, you could mess it up, so be careful.
   ;; Your init file should contain only one such instance.
   ;; If there is more than one, they won't work right.
- '(default ((t (:stipple nil :background "black" :foreground "grey80" :inverse-video nil :box nil :strike-through nil :overline nil :underline nil :slant normal :weight normal :height 95 :width normal :family "bitstream vera sans mono"))))
+ '(default ((t (:stipple nil
+                         :background "black"
+                         :foreground "grey80"
+                         :inverse-video nil
+                         :box nil
+                         :strike-through nil
+                         :overline nil
+                         :underline nil
+                         :slant normal
+                         :weight normal
+                         :height 105
+                         :width normal
+                         :family "deja sans mono"))))
  '(font-lock-builtin-face ((((class color) (min-colors 88) (background dark)) (:foreground "LightSlateBlue"))))
  '(font-lock-comment-delimiter-face ((default (:inherit font-lock-comment-face :foreground "OrangeRed3")) (((class color) (min-colors 16)) nil)))
  '(font-lock-comment-face ((((class color) (min-colors 88) (background dark)) (:foreground "OrangeRed3"))))
@@ -120,3 +133,5 @@
 
 (setq frame-title-format
   '("" (buffer-file-name "%f" (dired-directory dired-directory "%b"))))
+
+(add-hook 'find-file-hook 'bh-choose-header-mode)
