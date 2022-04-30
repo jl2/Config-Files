@@ -1,0 +1,33 @@
+;; -*- emacs-lisp -*- <22/04/01 08:56:47 /home/jeremiah/.emacs.d/tramp>
+;; Tramp connection history.  Don't change this file.
+;; Run `M-x tramp-cleanup-all-connections' instead.
+
+(((tramp-file-name "scp" "jeremiah" nil "192.168.0.14" nil nil nil)
+  ("null-device" "/dev/null")
+  ("perl-file-spec" t)
+  ("uname" "Linux 4.9.35-v7+")
+  ("locale" "LC_ALL=en_US.utf8")
+  ("test" "test")
+  ("remote-path"
+   ("/bin" "/usr/bin" "/sbin" "/usr/sbin" "/usr/local/bin" "/usr/local/sbin"))
+  ("pipe-buf" 4096)
+  ("remote-shell" "/bin/sh")
+  ("file-exists" "test -e")
+  ("stat" "env QUOTING_STYLE=locale \\stat")
+  ("id" "/usr/bin/id")
+  ("gid-string" "jeremiah")
+  ("uid-string" "jeremiah")
+  ("tmpdir" "/scp:jeremiah@192.168.0.14:/tmp")
+  ("uid-integer" 1000)
+  ("gid-integer" 1000)
+  ("case-insensitive" nil)
+  ("readlink" "\\readlink")
+  ("ls" "/bin/ls --color=never")
+  ("ls--quoting-style=literal --show-control-chars" "--quoting-style=literal --show-control-chars")
+  ("ls--dired" "--dired")
+  ("df-blocksize" 1)
+  ("df" "\\df --block-size=1 --output=size,used,avail")
+  ("perl-cwd-realpath" t)
+  ("perl" "\\perl"))
+ ((tramp-file-name "sudo" "root" nil "debian" nil nil nil)
+  nil))

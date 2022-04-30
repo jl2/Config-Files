@@ -1,0 +1,1 @@
+with "gnat_util"; abstract project check is end check;

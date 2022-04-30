@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+
+xrandr --output HDMI-0 --mode 1920x1080 --fbmm 530x300
+xsetroot -cursor_name left_ptr -solid black -name root-window
+
+echo Xft.dpi: 144 | xrdb -merge
+
+xmodmap ~/.xmodmap
+
+numlockx on
+
+xset r rate 200 30
+xset s off
+xset b off

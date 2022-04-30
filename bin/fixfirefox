@@ -1,0 +1,3 @@
+#!/usr/bin/env bash
+
+find /usr/lib -name libxul.so -exec patchelf --set-rpath /usr/lib/apulse {} ";"

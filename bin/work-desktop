@@ -1,0 +1,3 @@
+#!/usr/bin/bash
+
+remmina --connect=/home/jeremiah/anark_stuff/group_rdp_work_machine_wrkp520-06-anark-com.remmina

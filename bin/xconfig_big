@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+
+xrandr --output DP-2 --mode 3840x2160 --dpi 165 --fbmm 610x330
+xsetroot -cursor_name left_ptr -solid black -name root-window
+
+echo Xft.dpi: 165 | xrdb -merge
+
+xmodmap ~/.xmodmap
+
+numlockx on
+
+xset r rate 200 30
+xset s off
+xset b off

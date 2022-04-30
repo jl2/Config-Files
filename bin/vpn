@@ -1,0 +1,11 @@
+#!/usr/bin/bash
+
+timeout=5
+
+. .vpn_info
+echo "Launching VPN and waiting $timeout seconds."
+/usr/sbin/netExtender --username=$VPN_USER \
+                      --password=$VPN_PASS \
+                      --domain=$VPN_DOMAIN \
+                      --always-trust \
+                      $VPN_HOST

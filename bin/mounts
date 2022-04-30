@@ -1,0 +1,4 @@
+#!/bin/sh
+
+# sudo mount /dev/sdb2 ~/old_drive &
+sudo mount /dev/sdc2 /mnt/external &

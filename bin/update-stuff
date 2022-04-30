@@ -1,0 +1,84 @@
+#!/usr/bin/env bash
+
+# Update software
+
+# The order here is important.
+# Update the OS first because other software builds against it.
+# Update SBCL next because StumpWM and Slime depend on it
+# Update StumpWM after SBCL
+# Update Emacs after the OS and StumpWM
+# Update Slime after SBCL and Emacs, and after restarting Emacs
+# After Slime, updating the other CL implementations and Blend2D
+#  can be done in any order
+
+export OSS_DIR=$HOME/oss_src/
+export LISP_DIR=$HOME/src/lisp/
+export SBCL_SPACE=32768
+
+# Update Debian
+sudo apt-get update
+sudo apt-get dist-upgrade
+
+# Update SBCL
+cd $OSS_DIR/sbcl
+git checkout master
+git pull
+sh clean.sh
+rm -Rv $HOME/.cache/common-lisp/sbcl*
+sh make.sh --dynamic-space-size=$SBCL_SPACE
+sudo sh install.sh
+
+# Update StumpWM
+cd $LISP_DIR/stumpwm
+git pull upstream master
+make clean
+./configure
+sbcl --no-userinit --eval "(let ((quicklisp-init \"$HOME/quicklisp/setup.lisp\")) (when (probe-file quicklisp-init) (load quicklisp-init)))" --eval "(ql:quickload :stumpwm)"  --eval "(quit)"
+make
+sudo make install
+
+
+# Update Emacs
+cd $OSS_DIR/emacs
+git checkout master
+# git pull
+make distclean
+./configure --with-x-toolkit=lucid --with-native-compilation
+make -j20
+sudo make install
+
+# Restart Emacs
+# TODO: give some kind of warning...
+systemctl --user restart emacs.service
+
+# Update Slime
+cd $LISP_DIR/slime
+git pull
+make clean
+make
+
+# Update CCL
+cd $OSS_DIR/ccl/
+git pull
+rm -Rf $HOME/.cache/common-lisp/ccl*
+./ccl/lx86cl64 --eval "(ccl:rebuild-ccl :full t)" --eval "(quit)"
+
+# Update Clisp
+cd $OSS_DIR/clisp/
+git pull
+rm -Rf $HOME/.cache/common-lisp/clisp*
+sudo make clean
+./configure
+make -j20
+sudo make install
+
+# Update ABCL
+cd $OSS_DIR/abcl/
+git pull
+rm -Rf $HOME/.cache/common-lisp/abcl*
+ant abcl.clean
+ant abcl.release
+
+# Update Blend2D
+cd $OSS_DIR/blend2d/
+bash ./build.sh

@@ -1,0 +1,3 @@
+#!/bin/sh
+
+exec /usr/bin/urxvt -fn "xft:JuliaMono:size=11" -rv -tr -e tmux -2 attach
