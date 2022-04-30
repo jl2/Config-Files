@@ -1,0 +1,311 @@
+;; -*- mode: Lisp; fill-column: 75; comment-column: 50; -*-
+
+;;(declaim (optimize (speed 3) (safety 1) (debug 1)))
+
+;;(setf *read-default-float-format* 'double-float)
+
+#-quicklisp
+(let ((quicklisp-init "/home/jeremiah/quicklisp/setup.lisp"))
+  (when (probe-file quicklisp-init)
+    (load quicklisp-init)))
+
+
+;; (push :3d-vectors-double-floats *features*)
+
+(setf ql:*quickload-verbose* t)
+(setf ql:*quickload-explain* t)
+(setf cl:*print-right-margin* 200)
+
+(ql:quickload '( :uiop :quickproject :alexandria))
+;; :3d-matrices :3d-vectors
+;; (use-package :3d-vectors)
+;; (use-package :3d-matrices)
+
+(setf quickproject:*include-copyright* t)
+(setf quickproject:*license* "ISC")
+(setf quickproject:*author* "Jeremiah LaRocco <jeremiah_larocco@fastmail.com>")
+(setf quickproject:*template-directory* "~/lisp-template/")
+
+(defun new-project (project-name
+                    &rest deps)
+  (quickproject:make-project
+   (format nil "~~/src/lisp/~a/" (string-downcase (format nil "~a" project-name)))
+   :depends-on (adjoin :alexandria (adjoin :j-utils deps))))
+
+
+(defun add-times (&rest min-and-seconds)
+  "Add durations specified as (minute second) and return a total
+minutes and seconds."
+  (let ((total-min 0)
+        (total-sec 0))
+    (loop for (min sec) on min-and-seconds by #'cddr
+       do
+         (incf total-min min)
+         (incf total-sec sec)
+         (when (>=  total-sec 60)
+           (incf total-min (floor (/ total-sec 60)))
+           (setf total-sec (mod total-sec 60))))
+    (values total-min total-sec)))
+
+
+(ql:quickload :swank)
+(when (find "--server" sb-ext:*posix-argv* :test #'string=)
+  (setf swank:*use-dedicated-output-stream* nil)
+  (setf swank:*communication-style* :fd-handler)
+  (swank:create-server :port 4005  :dont-close t))
+
+(defun create-makefile (package-name
+                        &key
+                          (entry "main")
+                          (directory (format nil
+                                             "~~/src/lisp/~a/"
+                                             package-name))
+                          (binary-name package-name)
+                          (extra-buildapp-flags "--compress-core")
+                          (manifest-file-name "manifest.txt")
+                          (quicklisp-setup "~/quicklisp/setup.lisp"))
+  "Create a Makefile for building an executable image from a Common Lisp package."
+  (let* ((lisp-files (mapcar
+                      #'file-namestring
+                      (uiop:directory-files directory "*.lisp")))
+         (asd-files (mapcar
+                     #'file-namestring
+                     (uiop:directory-files directory "*.asd")))
+         (asd-file-name (format nil "~a~a.asd" directory package-name))
+         (asd-file (alexandria:with-input-from-file (ins asd-file-name) (read ins)))
+         (makefile-name (format nil "~aMakefile" directory))
+         (dependencies (mapcar #'string-downcase (getf asd-file :depends-on))))
+
+    (alexandria:with-output-to-file (outs makefile-name :if-exists :supersede)
+      (format outs
+              "~a: ~a ~{~a ~} ~{~a ~}~%"
+              binary-name manifest-file-name lisp-files asd-files)
+      (format outs
+              "	buildapp --output ~a ~a --manifest-file ~a ~{--load-system ~a ~} --load-system ~a --entry '~a:~a'~%"
+              binary-name
+              extra-buildapp-flags
+              manifest-file-name
+              dependencies
+              package-name
+              package-name
+              entry)
+      (format outs
+              "~%~%~a: ~{~a ~}~%" manifest-file-name asd-files)
+      (format outs
+              "	sbcl --no-userinit --no-sysinit --non-interactive --load ~a ~{--eval '(ql:quickload :~a)' ~} --eval '(ql:write-asdf-manifest-file \"~a~a\")'~%"
+              quicklisp-setup
+              dependencies
+              directory
+              manifest-file-name)
+      (format outs "~%~%clean:~%	rm -Rf ~a ~a *.fasl~%~%.PHONY: clean"
+              manifest-file-name binary-name))))
+
+
+
+;; (defun make-static-gist (gist-url)
+;;   "Retrieve a Gist from GitHub and format it as static CSS and HTML."
+;;   (let* ((nl-string (format nil "~c" #\newline))
+;;          ;; Make sure the url has ".js" on the end
+;;          (ending (subseq gist-url (- (length gist-url) 3)))
+;;          (js-url (if (string= ending ".js")
+;;                      gist-url
+;;                      (concatenate 'string gist-url ".js")))
+;;          ;; Fetch the embedded gist from GitHub
+;;          (gist-data (drakma:http-request js-url)))
+;;     ;; Read the string data
+;;     (with-input-from-string (strm gist-data)
+;;       (let* (
+;;              ;; Get the CSS link
+;;              (css-html (read-line strm))
+;;              ;; Get the document data
+;;              (doc-part (read-line strm))
+;;              ;; Parse out the CSS URL and fetch it
+;;              ;; 45 is the length of "document.write...",
+;;              ;; 4 is the length of "\");" on the end
+;;              (css-url (subseq css-html 45 (- (length css-html) 4)))
+;;              (style-sheet (drakma:http-request css-url))
+;;              ;; Remove \n and \ from the html
+;;              (escaped-html (subseq doc-part 16 (- (length doc-part) 4)))
+;;              (html-nl (cl-ppcre:regex-replace-all "\\\\n" escaped-html nl-string))
+;;              (raw-html (cl-ppcre:regex-replace-all "\\" html-nl "")))
+;;         ;; Print everything out
+;;         (format t "~a~%" style-sheet)
+;;         (format t "~a~%" raw-html)))))
+;; ;; -*- mode: Lisp; fill-column: 75; comment-column: 50; -*-
+
+;; ;;(declaim (optimize (speed 3) (safety 1) (debug 1)))
+
+;; #-quicklisp
+;; (let ((quicklisp-init "/home/jeremiah/quicklisp/setup.lisp"))
+;;   (when (probe-file quicklisp-init)
+;;     (load quicklisp-init)))
+
+;; (setf *read-default-float-format* 'double-float)
+
+;; (push :3d-vectors-double-floats *features*)
+
+;; (ql:quickload '(:alexandria :uiop :quickproject :st-json :cffi))
+
+;; (pushnew "/usr/local/lib/" cffi:*foreign-library-directories* :test #'equal)
+
+;; (use-package :alexandria)
+
+;; (use-package :st-json)
+
+;; ;; (defun copy-license (pathname &key
+;; ;;                      template-parameters
+;; ;;                      ((:template-directory *template-directory*)
+;; ;;                       *template-directory*)
+;; ;;                      ((:depends-on *depends-on*) *depends-on*)
+;; ;;                      ((:author *author*) *author*)
+;; ;;                      ((:license *license*) *license*)
+;; ;;                      (name (pathname-project-name pathname) name-provided-p)
+;; ;;                                 ((:include-copyright *include-copyright*) *include-copyright*))
+;; ;;   (declare (ignorable pathname template-parameters *author* *depends-on* *license* name *include-copyright*))
+
+;; ;;   (uiop:copy-file
+;; ;;    "/home/jeremiah/src/lisp/LICENSE"
+;; ;;    (format nil "~a/LICENSE" pathname))
+;; ;;   )
+
+;; ;; ;; Was needed on old versions of quicklisp
+;; ;; (defun rename-readme (pathname &key
+;; ;;                      template-parameters
+;; ;;                      ((:template-directory *template-directory*)
+;; ;;                       *template-directory*)
+;; ;;                      ((:depends-on *depends-on*) *depends-on*)
+;; ;;                      ((:author *author*) *author*)
+;; ;;                      ((:license *license*) *license*)
+;; ;;                      (name (pathname-project-name pathname) name-provided-p)
+;; ;;                                 ((:include-copyright *include-copyright*) *include-copyright*))
+
+;; ;;   (declare (ignorable pathname template-parameters *author* *depends-on* *license* name *include-copyright*))
+;; ;;   (uiop:rename-file-overwriting-target
+;; ;;    (format nil "~a/README.txt" pathname)
+;; ;;    (format nil "~a/README.md" pathname)))
+
+;; (setf quickproject:*author* "Jeremiah LaRocco <jeremiah_larocco@fastmail.com>")
+;; (setf quickproject:*license* "ISC")
+;; (setf quickproject:*include-copyright* t)
+;; ;; (push #'copy-license quickproject:*after-make-project-hooks*)
+;; ;; (push #'rename-readme quickproject:*after-make-project-hooks*)
+
+
+;; (setf *read-default-float-format* 'double-float)
+
+;; (defmacro dohash ((key-name value-name hash-table) &body body)
+;;   (let ((next (gensym "next"))
+;;         (more (gensym "more")))
+;;     `(with-hash-table-iterator (,next ,hash-table)
+;;        (loop (multiple-value-bind (,more ,key-name ,value-name)
+;;                  (,next)
+;;                (unless ,more (return nil))
+;;                ,@body)))))
+
+;; (defun add-times (&rest min-and-seconds)
+;;   (let ((total-min 0)
+;;         (total-sec 0))
+;;     (loop for (min sec) on min-and-seconds by #'cddr
+;;        do
+;;          (incf total-min min)
+;;          (incf total-sec sec)
+;;          (when (>=  total-sec 60)
+;;            (incf total-min (floor (/ total-sec 60)))
+;;            (setf total-sec (mod total-sec 60))))
+;;     (values total-min total-sec)))
+
+
+(ql:quickload :swank)
+(when (find "--server" sb-ext:*posix-argv* :test #'string=)
+  (setf swank:*use-dedicated-output-stream* nil)
+  (setf swank:*communication-style* :fd-handler)
+  (swank:create-server :port 4006  :dont-close t))
+
+;; (DEFUN create-makefile (package-name
+;;                         &key
+;;                           (entry "main")
+;;                           (directory (format nil "~~/src/lisp/~a/" package-name))
+;;                           (binary-name package-name)
+;;                           (extra-buildapp-flags "--compress-core")
+;;                           (manifest-file-name "manifest.txt")
+;;                           (quicklisp-setup "~/quicklisp/setup.lisp"))
+;;   "Create a Makefile for building an executable image from a Common Lisp package."
+
+;;   (let* ((lisp-files (mapcar #'file-namestring (uiop:directory-files directory "*.lisp")))
+;;          (asd-files (mapcar #'file-namestring (uiop:directory-files directory "*.asd")))
+
+;;          (asd-file-name (format nil "~a~a.asd" directory package-name))
+;;          (asd-file (with-input-from-file (ins asd-file-name) (read ins)))
+;;          (makefile-name (format nil "~aMakefile" directory))
+;;          (dependencies (mapcar #'string-downcase (getf asd-file :depends-on))))
+
+;;     (with-output-to-file (outs makefile-name :if-exists :supersede)
+;;       (declare (type stream outs))
+;;       (format outs "~a: ~a ~{~a ~} ~{~a ~}~%" binary-name manifest-file-name lisp-files asd-files)
+;;       (format outs "	buildapp --output ~a ~a --manifest-file ~a ~{--load-system ~a ~} --load-system ~a --entry '~a:~a'~%"
+;;               binary-name
+;;               extra-buildapp-flags
+;;               manifest-file-name
+;;               dependencies
+;;               package-name
+;;               package-name
+;;               entry)
+;;       (format outs "~%~%~a: ~{~a ~}~%" manifest-file-name asd-files)
+;;       (format outs "	sbcl --no-userinit --no-sysinit --non-interactive --load ~a ~{--eval '(ql:quickload :~a)' ~} --eval '(ql:write-asdf-manifest-file \"~a~a\")'~%"
+;;               quicklisp-setup
+;;               dependencies
+;;               directory
+;;               manifest-file-name)
+;;       (format outs "~%~%clean:~%	rm -Rf ~a ~a *.fasl~%~%.PHONY: clean" manifest-file-name binary-name))))
+
+;; ;; (defun make-static-gist (gist-url)
+;; ;;   "Retrieve a Gist from GitHub and format it as static CSS and HTML."
+;; ;;   (let* ((nl-string (format nil "~c" #\newline))
+;; ;;          ;; Make sure the url has ".js" on the end
+;; ;;          (ending (subseq gist-url (- (length gist-url) 3)))
+;; ;;          (js-url (if (string= ending ".js")
+;; ;;                      gist-url
+;; ;;                      (concatenate 'string gist-url ".js")))
+;; ;;          ;; Fetch the embedded gist from GitHub
+;; ;;          (gist-data (drakma:http-request js-url)))
+;; ;;     ;; Read the string data
+;; ;;     (with-input-from-string (strm gist-data)
+;; ;;       (let* (
+;; ;;              ;; Get the CSS link
+;; ;;              (css-html (read-line strm))
+;; ;;              ;; Get the document data
+;; ;;              (doc-part (read-line strm))
+;; ;;              ;; Parse out the CSS URL and fetch it
+;; ;;              ;; 45 is the length of "document.write...",
+;; ;;              ;; 4 is the length of "\");" on the end
+;; ;;              (css-url (subseq css-html 45 (- (length css-html) 4)))
+;; ;;              (style-sheet (drakma:http-request css-url))
+;; ;;              ;; Remove \n and \ from the html
+;; ;;              (escaped-html (subseq doc-part 16 (- (length doc-part) 4)))
+;; ;;              (html-nl (cl-ppcre:regex-replace-all "\\\\n" escaped-html nl-string))
+;; ;;              (raw-html (cl-ppcre:regex-replace-all "\\" html-nl "")))
+;; ;;         ;; Print everything out
+;; ;;         (format t "~a~%" style-sheet)
+;; ;;         (format t "~a~%" raw-html)))))
+
+;; (defun show-kitty()
+;;   (with-output-to-file (outs "/tmp/kitty.jpg" :element-type '(unsigned-byte 8) :if-exists :overwrite)
+;;     (write-sequence (drakma:http-request (format nil
+;;                                                  "http://placekitten.com/~a/~a"
+;;                                                  (+ 800 (random 8))
+;;                                                  (+ 800 (random 8))))
+;;                     outs))
+;;   (swank:ed-in-emacs "/tmp/kitty.jpg"))
+
+;; (defun to-hhmmss (duration &optional stream)
+;;   (multiple-value-bind (nsecs secs minutes hours days weeks) (decode-duration duration :weeks t)
+;;     (with-designated-stream (stream stream)
+;;       (let ((isecs (round secs)))
+;;         (cond ((or (> weeks 0))
+;;                (format stream "~d weeks, ~d days, ~2,'0d:~2,'0d:~2,'0d" weeks days hours minutes isecs))
+;;               ((or (> days 1))
+;;                (format stream "~d days, ~2,'0d:~2,'0d:~2,'0d" days hours minutes isecs))
+;;               (t (format stream "~2,'0d:~2,'0d:~2,'0d"
+;;                          (+ (* days 24) hours)
+;;                          minutes
+;;                          isecs)))))))

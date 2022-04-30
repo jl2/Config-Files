@@ -1,0 +1,15 @@
+
+* (#| TMPL_VAR name |#)
+** About
+This is a project to do something.
+
+** License
+(#| TMPL_VAR license |#)
+(#| TMPL_IF copyright |#)
+
+(#| TMPL_VAR copyright |#)
+(#| /TMPL_IF |#)
+
+
+* Plan
+** TODO Fill in a TODO list.

@@ -1,0 +1,4 @@
+#-quicklisp
+(let ((quicklisp-init "/home/jeremiah/quicklisp/setup.lisp"))
+  (when (probe-file quicklisp-init)
+    (load quicklisp-init)))
