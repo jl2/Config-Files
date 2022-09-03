@@ -10,16 +10,13 @@
     (load quicklisp-init)))
 
 
-;; (push :3d-vectors-double-floats *features*)
-
 (setf ql:*quickload-verbose* t)
 (setf ql:*quickload-explain* t)
 (setf cl:*print-right-margin* 200)
 
-(ql:quickload '( :uiop :quickproject :alexandria))
-;; :3d-matrices :3d-vectors
-;; (use-package :3d-vectors)
-;; (use-package :3d-matrices)
+(ql:quickload '( :uiop :quickproject :alexandria :st-json))
+
+(setf st-json:*output-literal-unicode* t)
 
 (setf quickproject:*include-copyright* t)
 (setf quickproject:*license* "ISC")
@@ -30,7 +27,7 @@
                     &rest deps)
   (quickproject:make-project
    (format nil "~~/src/lisp/~a/" (string-downcase (format nil "~a" project-name)))
-   :depends-on (adjoin :alexandria (adjoin :j-utils deps))))
+   :depends-on (concatenate 'list '(:j-utils :alexandria) deps)))
 
 
 (defun add-times (&rest min-and-seconds)
@@ -52,6 +49,8 @@ minutes and seconds."
 (when (find "--server" sb-ext:*posix-argv* :test #'string=)
   (setf swank:*use-dedicated-output-stream* nil)
   (setf swank:*communication-style* :fd-handler)
+  (format t "Swank listening on port 4005~%")
+  (format t "Connect using (slime-connect \"localhost\" 4005)~%")
   (swank:create-server :port 4005  :dont-close t))
 
 (defun create-makefile (package-name
@@ -101,6 +100,38 @@ minutes and seconds."
               manifest-file-name binary-name))))
 
 
+
+
+(ql:quickload :swank)
+
+(defun refresh-buffer (name)
+  (swank:eval-in-emacs
+   `(progn
+      (switch-to-buffer-other-window ,name)
+      (revert-buffer :ignore-auto :noconfirm)
+      (switch-to-buffer-other-window (slime-repl-buffer)))))
+
+(when (find "--server" sb-ext:*posix-argv* :test #'string=)
+  (setf swank:*use-dedicated-output-stream* nil)
+  (setf swank:*communication-style* :fd-handler)
+  (swank:create-server :port 4006  :dont-close t))
+
+
+(defun mapcn (chars nums string)
+  (loop as char across string
+        as i = (position char chars)
+        collect (and i (nth i nums))))
+
+(defun parse-roman (R)
+  (loop with nums = (mapcn "IVXLCDM" '(1 5 10 50 100 500 1000) R)
+        as (A B) on nums if A sum (if (and B (< A B)) (- A) A)))
+
+
+;; (push :3d-vectors-double-floats *features*)
+
+;; :3d-matrices :3d-vectors
+;; (use-package :3d-vectors)
+;; (use-package :3d-matrices)
 
 ;; (defun make-static-gist (gist-url)
 ;;   "Retrieve a Gist from GitHub and format it as static CSS and HTML."
@@ -215,11 +246,10 @@ minutes and seconds."
 ;;     (values total-min total-sec)))
 
 
-(ql:quickload :swank)
-(when (find "--server" sb-ext:*posix-argv* :test #'string=)
-  (setf swank:*use-dedicated-output-stream* nil)
-  (setf swank:*communication-style* :fd-handler)
-  (swank:create-server :port 4006  :dont-close t))
+
+;; (defun +roman (&rest rx)
+;;   (format nil "~@R"
+;;     (reduce #'+ (mapcar #'parse-roman rx))))
 
 ;; (DEFUN create-makefile (package-name
 ;;                         &key
