@@ -3,6 +3,10 @@
 *.eln
 .saves*
 
+.vpn_info
+.*api*
+.*key*
+
 # This list borrowed from here:
 # https://github.com/purcell/emacs.d/blob/master/.gitignore
 /url/cache
