@@ -15,13 +15,41 @@ export OSS_DIR=$HOME/oss_src/
 export LISP_DIR=$HOME/src/lisp/
 export SBCL_SPACE=32768
 
+echo "********************************************************************************"
+echo "* ssh-add"
+echo "********************************************************************************"
+
+if ssh-add -L | grep --quiet jeremiah; then
+   echo "Skipping ssh-add."
+else
+    ssh-add
+fi
+
+
+echo "********************************************************************************"
+echo "* Removing old Apt archives"
+echo "********************************************************************************"
+
+# Delete old .deb files
+sudo rm -Rf /var/cache/apt/archives/*.deb
+
+echo "********************************************************************************"
+echo "* Updating Debian"
+echo "********************************************************************************"
 # Update Debian
 sudo apt-get update
 sudo apt-get dist-upgrade
 
+# TODO: Manually update these until unix-select debacle is settled
 # Update SBCL
 cd $OSS_DIR/sbcl
+echo "********************************************************************************"
+echo "* Updating SBCL"
+echo "********************************************************************************"
+git fetch --all
+echo "--> Updating SBCL"
 git checkout master
+echo "--> Updating SBCL"
 git pull
 sh clean.sh
 rm -Rv $HOME/.cache/common-lisp/sbcl*
@@ -30,41 +58,80 @@ sudo sh install.sh
 
 # Update StumpWM
 cd $LISP_DIR/stumpwm
+echo "********************************************************************************"
+echo "* Updating StumpWM"
+echo "********************************************************************************"
+git fetch --all
+git checkout master
 git pull upstream master
+git push origin master
 make clean
 ./configure
-sbcl --no-userinit --eval "(let ((quicklisp-init \"$HOME/quicklisp/setup.lisp\")) (when (probe-file quicklisp-init) (load quicklisp-init)))" --eval "(ql:quickload :stumpwm)"  --eval "(quit)"
+sbcl --no-userinit \
+     --eval "(let ((quicklisp-init \"$HOME/quicklisp/setup.lisp\")) \
+               (when (probe-file quicklisp-init) \
+                 (load quicklisp-init)))" \
+     --eval "(ql:quickload :stumpwm)" \
+     --eval "(quit)"
 make
 sudo make install
 
 
 # Update Emacs
 cd $OSS_DIR/emacs
+echo "********************************************************************************"
+echo "* Updating Emacs"
+echo "********************************************************************************"
 git checkout master
-# git pull
+git pull
 make distclean
-./configure --with-x-toolkit=lucid --with-native-compilation
-make -j20
+./configure --with-x-toolkit=lucid \
+            --with-native-compilation \
+            --with-libsystemd \
+            --with-json \
+            --with-cairo \
+            --with-libotf \
+            --with-harfbuzz \
+            --with-zlib \
+            --with-threads \
+            --with-modules \
+            --with-zlib \
+            --with-gnutls
+make -j23
 sudo make install
 
 # Restart Emacs
-# TODO: give some kind of warning...
+# TODO: give some kind of warning to the user...
+echo "********************************************************************************"
+echo "* Restarting Emacs"
+echo "********************************************************************************"
 systemctl --user restart emacs.service
+emacsclient --quiet --no-wait --reuse-frame --display=:0.0
 
 # Update Slime
 cd $LISP_DIR/slime
-git pull
+echo "********************************************************************************"
+echo "* Updating Slime"
+echo "********************************************************************************"
+git fetch --all
+git pull origin master
 make clean
 make
 
 # Update CCL
 cd $OSS_DIR/ccl/
+echo "********************************************************************************"
+echo "* Updating CCL"
+echo "********************************************************************************"
 git pull
 rm -Rf $HOME/.cache/common-lisp/ccl*
 ./ccl/lx86cl64 --eval "(ccl:rebuild-ccl :full t)" --eval "(quit)"
 
 # Update Clisp
 cd $OSS_DIR/clisp/
+echo "********************************************************************************"
+echo "* Updating Clisp"
+echo "********************************************************************************"
 git pull
 rm -Rf $HOME/.cache/common-lisp/clisp*
 sudo make clean
@@ -74,6 +141,9 @@ sudo make install
 
 # Update ABCL
 cd $OSS_DIR/abcl/
+echo "********************************************************************************"
+echo "* Updating ABCL"
+echo "********************************************************************************"
 git pull
 rm -Rf $HOME/.cache/common-lisp/abcl*
 ant abcl.clean
@@ -81,4 +151,7 @@ ant abcl.release
 
 # Update Blend2D
 cd $OSS_DIR/blend2d/
+echo "********************************************************************************"
+echo "* Updating Blend2D"
+echo "********************************************************************************"
 bash ./build.sh

@@ -1,16 +1,22 @@
 #!/usr/bin/env bash
 
-xrandr --output DP-2 --primary --mode 3840x2160 --fbmm 610x330
-xrandr --output DP-4 --mode 1920x1080 --right-of DP-2  --dpi 100 --panning 1920x1080
+xrandr --output DP-2 --primary --mode 3840x2160 --dpi 144
 
-echo Xft.dpi: 165 | xrdb -merge
+# Previously used xrandr commands:
+# xrandr --output DP-4 --mode 1920x1080 --left-of DP-2  --dpi 100
+# xrandr --output DP-2 --mode 3840x2160 --dpi 165 --fbmm 610x330
+# xrandr --output HDMI-0 --mode 1920x1080 --fbmm 530x300
+
+echo Xft.dpi: 144 | xrdb -merge
 
 xsetroot -cursor_name left_ptr -solid black -name root-window
 
+# Capslock -> Ctrl
 xmodmap ~/.xmodmap
 
 numlockx on
 
+# Faster keyboard repeat, turn off beeps, turn off screensaver (why?)
 xset r rate 200 30
 xset s off
 xset b off

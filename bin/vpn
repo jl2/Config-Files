@@ -4,8 +4,16 @@ timeout=5
 
 . .vpn_info
 echo "Launching VPN and waiting $timeout seconds."
+old_tmux_win=`tmux display -p \#W`
+
+tmux rename-window VPN-VPN-VPN-VPN
+export DISPLAY=:0.0
+
+remmina &
 /usr/sbin/netExtender --username=$VPN_USER \
                       --password=$VPN_PASS \
                       --domain=$VPN_DOMAIN \
                       --always-trust \
                       $VPN_HOST
+
+tmux rename-window "$old_tmux_win"
