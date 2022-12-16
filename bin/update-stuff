@@ -149,9 +149,9 @@ rm -Rf $HOME/.cache/common-lisp/abcl*
 ant abcl.clean
 ant abcl.release
 
-# Update Blend2D
-cd $OSS_DIR/blend2d/
-echo "********************************************************************************"
-echo "* Updating Blend2D"
-echo "********************************************************************************"
-bash ./build.sh
+# # Update Blend2D
+# cd $OSS_DIR/blend2d/
+# echo "********************************************************************************"
+# echo "* Updating Blend2D"
+# echo "********************************************************************************"
+# bash ./build.sh
