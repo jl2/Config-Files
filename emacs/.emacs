@@ -231,6 +231,7 @@
       (sql-server "localhost")
       (sql-database "postgis")
       (sql-port 54320))))
+ '(sql-sqlite-program "sqlite3")
  '(tab-width 4)
  '(text-scale-mode-step 1.125)
  '(truncate-lines t)
@@ -264,7 +265,7 @@
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
- '(default ((t (:inherit nil :extend nil :stipple nil :background "gray14" :foreground "bisque2" :inverse-video nil :box nil :strike-through nil :overline nil :underline nil :slant normal :weight regular :height 140 :width normal :foundry "UKWN" :family "JuliaMono"))))
+ '(default ((t (:inherit nil :extend nil :stipple nil :background "gray14" :foreground "bisque2" :inverse-video nil :box nil :strike-through nil :overline nil :underline nil :slant normal :weight regular :height 120 :width normal :foundry "UKWN" :family "JuliaMono"))))
  '(compilation-error ((t (:inherit error :inverse-video nil))))
  '(compilation-mode-line-exit ((t (:inherit compilation-info :background "black" :foreground "ForestGreen" :weight bold))))
  '(compilation-mode-line-fail ((t (:inherit compilation-error :foreground "spring green" :weight bold))))
