@@ -1,0 +1,4 @@
+#!/bin/sh
+
+sudo umount $HOME/kinesis
+

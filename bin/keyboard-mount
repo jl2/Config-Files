@@ -1,0 +1,4 @@
+#!/bin/sh
+
+sudo mount /dev/sdb $HOME/kinesis -o umask=000
+

@@ -1,3 +1,3 @@
 #!/bin/sh
 
-exec /usr/bin/urxvt -fn "xft:JuliaMono:size=11" -rv -tr -e tmux -2 attach
+exec /usr/bin/urxvt -fn "xft:IBM Plex Mono:size=11" -rv -tr -e tmux -2 attach

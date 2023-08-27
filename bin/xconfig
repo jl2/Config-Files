@@ -1,15 +1,15 @@
 #!/usr/bin/env bash
 
-xrandr --output DP-2 --primary --mode 3840x2160 --dpi 144
+xrandr --output DP-2 --primary --mode 3840x2160 --dpi 160
 
 # Previously used xrandr commands:
 # xrandr --output DP-4 --mode 1920x1080 --left-of DP-2  --dpi 100
 # xrandr --output DP-2 --mode 3840x2160 --dpi 165 --fbmm 610x330
 # xrandr --output HDMI-0 --mode 1920x1080 --fbmm 530x300
 
-echo Xft.dpi: 144 | xrdb -merge
+echo Xft.dpi: 160 | xrdb -merge
 
-xsetroot -cursor_name left_ptr -solid black -name root-window
+xsetroot -cursor_name left_ptr -rv -mod 16 16 -fg blue -bg darkgray -name root-windowt-
 
 # Capslock -> Ctrl
 xmodmap ~/.xmodmap
@@ -20,3 +20,19 @@ numlockx on
 xset r rate 200 30
 xset s off
 xset b off
+
+# Rumblepad mouse config
+# TODO: Figure out button mapping
+export MDEV="pointer:Logitech Logitech Cordless RumblePad 2"
+xinput set-prop "$MDEV" "Device Accel Constant Deceleration" 0.9
+xinput set-prop "$MDEV" "Device Accel Adaptive Deceleration" 1
+xinput set-prop "$MDEV" "Axis Amplify" 1.5 1.5 1.5 1.5 1.5 1.5
+xinput set-prop "$MDEV" "Button Mapping" 5 5 5 5 5 5 5 5 5 5 5 5
+xinput set-prop "$MDEV" "Button Number" 1 2 3 2 8 9 7 8 9 10 11 12
+xinput set-prop "$MDEV" "Axis Deadzone" 6000 6000 6000 6000 0 0 
+
+export APPLEDEV="pointer:Apple Inc. Magic Trackpad 2"
+xinput set-prop "$APPLEDEV" "libinput Accel Speed" 0.38
+xinput set-prop "$APPLEDEV" "lininput Middle Emulation Enabled" 1
+# xinput set-prop "$APPLEDEV" " Accel Adaptive Deceleration" 2
+

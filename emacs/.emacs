@@ -16,6 +16,9 @@
 (setenv "SSH_AUTH_SOCK" (concat (getenv "XDG_RUNTIME_DIR") "/ssh-agent.socket"))
 (setenv "PSQL_EDITOR" "emacsclient")
 
+(add-to-list 'load-path "~/src/lisp/slime/")
+(load "slime-autoloads")
+
 (custom-set-variables
  ;; custom-set-variables was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
@@ -27,52 +30,126 @@
  '(bidi-paragraph-direction 'left-to-right)
  '(browse-url-browser-function 'eww-browse-url)
  '(c-default-style
-   '((c-mode . "k&r")
-     (c++-mode . "java")
-     (java-mode . "java")
-     (awk-mode . "awk")
+   '((c-mode . "k&r") (c++-mode . "java") (java-mode . "java") (awk-mode . "awk")
      (other . "gnu")))
  '(c-hanging-braces-alist
-   '((block-open after)
-     (block-close . c-snug-do-while)
-     (statement-cont)
-     (substatement-open after)
-     (brace-list-open)
-     (brace-entry-open)
-     (extern-lang-open after)
-     (namespace-open after)
-     (module-open after)
-     (composition-open after)
-     (inexpr-class-open after)
-     (inexpr-class-close before)
-     (arglist-cont-nonempty)))
+   '((block-open after) (block-close . c-snug-do-while) (statement-cont)
+     (substatement-open after) (brace-list-open) (brace-entry-open)
+     (extern-lang-open after) (namespace-open after) (module-open after)
+     (composition-open after) (inexpr-class-open after)
+     (inexpr-class-close before) (arglist-cont-nonempty)))
  '(c-offsets-alist
-   '((substatement-open . +)
-     (substatement-open . 0)
-     (access-label . -)
+   '((substatement-open . +) (substatement-open . 0) (access-label . -)
      (statement-case-open . +)))
  '(column-number-mode t)
  '(compilation-ask-about-save t)
  '(compilation-context-lines nil)
  '(compilation-scroll-output t)
+ '(connection-local-criteria-alist
+   '(((:application tramp :protocol "kubernetes")
+      tramp-kubernetes-connection-local-default-profile)
+     ((:application tramp :protocol "flatpak")
+      tramp-container-connection-local-default-flatpak-profile
+      tramp-flatpak-connection-local-default-profile)
+     ((:application eshell) eshell-connection-default-profile)
+     ((:application tramp) tramp-connection-local-default-system-profile
+      tramp-connection-local-default-shell-profile)))
+ '(connection-local-profile-alist
+   '((tramp-flatpak-connection-local-default-profile
+      (tramp-remote-path "/app/bin" tramp-default-remote-path "/bin" "/usr/bin"
+                         "/sbin" "/usr/sbin" "/usr/local/bin" "/usr/local/sbin"
+                         "/local/bin" "/local/freeware/bin" "/local/gnu/bin"
+                         "/usr/freeware/bin" "/usr/pkg/bin" "/usr/contrib/bin"
+                         "/opt/bin" "/opt/sbin" "/opt/local/bin"))
+     (tramp-kubernetes-connection-local-default-profile
+      (tramp-config-check . tramp-kubernetes--current-context-data)
+      (tramp-extra-expand-args 97
+                               (tramp-kubernetes--container
+                                (car tramp-current-connection))
+                               104
+                               (tramp-kubernetes--pod
+                                (car tramp-current-connection))
+                               120
+                               (tramp-kubernetes--context-namespace
+                                (car tramp-current-connection))))
+     (tramp-container-connection-local-default-flatpak-profile
+      (tramp-remote-path "/app/bin" tramp-default-remote-path "/bin" "/usr/bin"
+                         "/sbin" "/usr/sbin" "/usr/local/bin" "/usr/local/sbin"
+                         "/local/bin" "/local/freeware/bin" "/local/gnu/bin"
+                         "/usr/freeware/bin" "/usr/pkg/bin" "/usr/contrib/bin"
+                         "/opt/bin" "/opt/sbin" "/opt/local/bin"))
+     (eshell-connection-default-profile (eshell-path-env-list))
+     (tramp-connection-local-darwin-ps-profile
+      (tramp-process-attributes-ps-args "-acxww" "-o"
+                                        "pid,uid,user,gid,comm=abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
+                                        "-o" "state=abcde" "-o"
+                                        "ppid,pgid,sess,tty,tpgid,minflt,majflt,time,pri,nice,vsz,rss,etime,pcpu,pmem,args")
+      (tramp-process-attributes-ps-format (pid . number) (euid . number)
+                                          (user . string) (egid . number)
+                                          (comm . 52) (state . 5)
+                                          (ppid . number) (pgrp . number)
+                                          (sess . number) (ttname . string)
+                                          (tpgid . number) (minflt . number)
+                                          (majflt . number)
+                                          (time . tramp-ps-time) (pri . number)
+                                          (nice . number) (vsize . number)
+                                          (rss . number) (etime . tramp-ps-time)
+                                          (pcpu . number) (pmem . number) (args)))
+     (tramp-connection-local-busybox-ps-profile
+      (tramp-process-attributes-ps-args "-o"
+                                        "pid,user,group,comm=abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
+                                        "-o" "stat=abcde" "-o"
+                                        "ppid,pgid,tty,time,nice,etime,args")
+      (tramp-process-attributes-ps-format (pid . number) (user . string)
+                                          (group . string) (comm . 52)
+                                          (state . 5) (ppid . number)
+                                          (pgrp . number) (ttname . string)
+                                          (time . tramp-ps-time) (nice . number)
+                                          (etime . tramp-ps-time) (args)))
+     (tramp-connection-local-bsd-ps-profile
+      (tramp-process-attributes-ps-args "-acxww" "-o"
+                                        "pid,euid,user,egid,egroup,comm=abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
+                                        "-o"
+                                        "state,ppid,pgid,sid,tty,tpgid,minflt,majflt,time,pri,nice,vsz,rss,etimes,pcpu,pmem,args")
+      (tramp-process-attributes-ps-format (pid . number) (euid . number)
+                                          (user . string) (egid . number)
+                                          (group . string) (comm . 52)
+                                          (state . string) (ppid . number)
+                                          (pgrp . number) (sess . number)
+                                          (ttname . string) (tpgid . number)
+                                          (minflt . number) (majflt . number)
+                                          (time . tramp-ps-time) (pri . number)
+                                          (nice . number) (vsize . number)
+                                          (rss . number) (etime . number)
+                                          (pcpu . number) (pmem . number) (args)))
+     (tramp-connection-local-default-shell-profile (shell-file-name . "/bin/sh")
+                                                   (shell-command-switch . "-c"))
+     (tramp-connection-local-default-system-profile (path-separator . ":")
+                                                    (null-device . "/dev/null"))))
  '(custom-enabled-themes '(adwaita))
  '(custom-safe-themes
-   '("14c79ed9d3b68f1320df62de2eadd77eb1253658338a42e0743bbce0e9fae8fe" "c414f69a02b719fb9867b41915cb49c853489930be280ce81385ff7b327b4bf6" "02fff7eedb18d38b8fd09a419c579570673840672da45b77fde401d8708dc6b5" "4d2a81f1bf4991302fce83f618d12fcbdceb9263c6d8b7c2d6c897600646d968" "e8825f26af32403c5ad8bc983f8610a4a4786eb55e3a363fa9acb48e0677fe7e" "c1126be58e0064385f8855eef3121df368d79ca001a748e9df8fe2fb6257d353" "d8dc153c58354d612b2576fea87fe676a3a5d43bcc71170c62ddde4a1ad9e1fb" "cdd26fa6a8c6706c9009db659d2dffd7f4b0350f9cc94e5df657fa295fffec71" default))
+   '("14c79ed9d3b68f1320df62de2eadd77eb1253658338a42e0743bbce0e9fae8fe"
+     "c414f69a02b719fb9867b41915cb49c853489930be280ce81385ff7b327b4bf6"
+     "02fff7eedb18d38b8fd09a419c579570673840672da45b77fde401d8708dc6b5"
+     "4d2a81f1bf4991302fce83f618d12fcbdceb9263c6d8b7c2d6c897600646d968"
+     "e8825f26af32403c5ad8bc983f8610a4a4786eb55e3a363fa9acb48e0677fe7e"
+     "c1126be58e0064385f8855eef3121df368d79ca001a748e9df8fe2fb6257d353"
+     "d8dc153c58354d612b2576fea87fe676a3a5d43bcc71170c62ddde4a1ad9e1fb"
+     "cdd26fa6a8c6706c9009db659d2dffd7f4b0350f9cc94e5df657fa295fffec71" default))
  '(describe-char-unidata-list
-   '(name old-name general-category canonical-combining-class bidi-class decomposition decimal-digit-value digit-value numeric-value mirrored iso-10646-comment uppercase lowercase titlecase))
+   '(name old-name general-category canonical-combining-class bidi-class
+          decomposition decimal-digit-value digit-value numeric-value mirrored
+          iso-10646-comment uppercase lowercase titlecase))
  '(diary-file "~/src/gtd/diary")
+ '(dired-guess-shell-alist-user '((".*.pdf" "mupdf")))
  '(dired-listing-switches "-lFaGh1v --group-directories-first")
  '(doc-view-image-width 1080)
  '(doc-view-pdf->png-converter-function 'doc-view-pdf->png-converter-mupdf)
  '(docker-image-columns
    '(("Repository" 60 "{{ json .Repository }}" nil nil)
-     ("Tag" 20 "{{ json .Tag }}" nil nil)
-     ("Id" 16 "{{ json .ID }}" nil nil)
+     ("Tag" 20 "{{ json .Tag }}" nil nil) ("Id" 16 "{{ json .ID }}" nil nil)
      ("Created" 24 "{{ json .CreatedAt }}" nil
-      (lambda
-        (x)
-        (format-time-string "%F %T"
-                            (date-to-time x))))
+      (lambda (x) (format-time-string "%F %T" (date-to-time x))))
      ("Size" 10 "{{ json .Size }}" docker-utils-human-size-predicate nil)))
  '(elpher-default-url-type "gemini")
  '(erc-fill-column 132)
@@ -86,7 +163,7 @@
  '(flymake-warning-bitmap '(exclamation-mark modus-theme-fringe-yellow))
  '(font-lock-maximum-size nil)
  '(frame-inhibit-implied-resize nil)
- '(geiser-active-implementations '(gauche guile racket chicken chez mit chibi))
+ '(geiser-active-implementations '(gauche guile racket chicken chez mit chibi) t)
  '(geiser-gauche-binary "/usr/local/bin/gosh")
  '(global-undo-tree-mode t)
  '(grep-command "grep -i -n -e ")
@@ -96,41 +173,28 @@
  '(grep-use-null-filename-separator t)
  '(highlight-tail-colors '(("#2f4a00" . 0) ("#00415e" . 20)))
  '(hippie-expand-try-functions-list
-   '(try-expand-dabbrev try-expand-dabbrev-all-buffers try-expand-dabbrev-from-kill try-complete-lisp-symbol-partially try-complete-lisp-symbol try-complete-file-name-partially try-complete-file-name try-expand-all-abbrevs try-expand-list try-expand-line))
+   '(try-expand-dabbrev try-expand-dabbrev-all-buffers try-expand-dabbrev-from-kill
+                        try-complete-lisp-symbol-partially
+                        try-complete-lisp-symbol
+                        try-complete-file-name-partially try-complete-file-name
+                        try-expand-all-abbrevs try-expand-list try-expand-line))
  '(hl-todo-keyword-faces
-   '(("HOLD" . "#cfdf30")
-     ("TODO" . "#feacd0")
-     ("NEXT" . "#b6a0ff")
-     ("THEM" . "#f78fe7")
-     ("PROG" . "#00d3d0")
-     ("OKAY" . "#4ae8fc")
-     ("DONT" . "#80d200")
-     ("FAIL" . "#ff8059")
-     ("BUG" . "#ff8059")
-     ("DONE" . "#44bc44")
-     ("NOTE" . "#f0ce43")
-     ("KLUDGE" . "#eecc00")
-     ("HACK" . "#eecc00")
-     ("TEMP" . "#ffcccc")
-     ("FIXME" . "#ff9977")
-     ("XXX+" . "#f4923b")
-     ("REVIEW" . "#6ae4b9")
-     ("DEPRECATED" . "#bfd9ff")))
+   '(("HOLD" . "#cfdf30") ("TODO" . "#feacd0") ("NEXT" . "#b6a0ff")
+     ("THEM" . "#f78fe7") ("PROG" . "#00d3d0") ("OKAY" . "#4ae8fc")
+     ("DONT" . "#80d200") ("FAIL" . "#ff8059") ("BUG" . "#ff8059")
+     ("DONE" . "#44bc44") ("NOTE" . "#f0ce43") ("KLUDGE" . "#eecc00")
+     ("HACK" . "#eecc00") ("TEMP" . "#ffcccc") ("FIXME" . "#ff9977")
+     ("XXX+" . "#f4923b") ("REVIEW" . "#6ae4b9") ("DEPRECATED" . "#bfd9ff")))
  '(ibuffer-deletion-face 'modus-theme-mark-del)
  '(ibuffer-filter-group-name-face 'modus-theme-mark-symbol)
  '(ibuffer-formats
-   '((mark modified read-only locked " "
-           (name 32 32 :left :elide)
-           " "
-           (size 16 -1 :right)
-           " "
-           (mode 32 32 :left :elide)
-           " " filename-and-process)
-     (mark " "
-           (name 16 -1)
-           " " filename)))
+   '((mark modified read-only locked " " (name 32 32 :left :elide) " "
+           (size 16 -1 :right) " " (mode 32 32 :left :elide) " "
+           filename-and-process)
+     (mark " " (name 16 -1) " " filename)))
  '(ibuffer-marked-face 'modus-theme-mark-sel)
  '(ibuffer-title-face 'modus-theme-pseudo-header)
+ '(image-auto-resize 'fit-window)
  '(indent-tabs-mode nil)
  '(inhibit-startup-screen t)
  '(large-file-warning-threshold 200000000)
@@ -138,17 +202,13 @@
  '(ls-lisp-dirs-first t)
  '(org-babel-C++-compiler "clang++")
  '(org-babel-load-languages
-   '((emacs-lisp . t)
-     (shell . t)
-     (lisp . t)
-     (python . t)
-     (C . t)
-     (clojure . t)
+   '((emacs-lisp . t) (shell . t) (lisp . t) (python . t) (C . t) (clojure . t)
      (ruby . t)))
  '(org-confirm-babel-evaluate nil)
  '(org-export-use-babel t)
  '(org-modules
-   '(ol-bbdb ol-bibtex ol-docview ol-doi ol-eww ol-gnus ol-info ol-irc ol-mhe ol-rmail org-tempo ol-w3m))
+   '(ol-bbdb ol-bibtex ol-docview ol-doi ol-eww ol-gnus ol-info ol-irc ol-mhe
+             ol-rmail org-tempo ol-w3m))
  '(org-src-block-faces 'nil)
  '(org-src-tab-acts-natively t)
  '(org-startup-indented nil)
@@ -158,7 +218,17 @@
      ("melpa" . "https://melpa.org/packages/")))
  '(package-native-compile t)
  '(package-selected-packages
-   '(highlight-context-line docker docker-api docker-cli docker-compose-mode dockerfile-mode mastodon whitespace-cleanup-mode paredit-everywhere inferior-islisp inf-ruby enh-ruby-mode ruby-electric modus-themes geiser-gauche dired-rainbow elisp-slime-nav slime-repl-ansi-color tree-sitter tree-sitter-indent tree-sitter-langs ac-slime elpher csv-mode cmake-mode cmake-project yaml-mode grep-a-lot paredit git-walktree magit glsl-mode ace-window diredfl ada-mode ada-ref-man ag dired-quick-sort git-timemachine farmhouse-theme erlang flycheck-pycheckers flycheck-pyflakes elpy htmlize lua-mode abyss-theme slime-docker dylan-mode julia-shell geiser gopher markdown-mode haskell-mode))
+   '(ansilove undo-tree magit magit-find-file poke poke-mode highlight-context-line
+              docker docker-api docker-cli docker-compose-mode dockerfile-mode
+              mastodon whitespace-cleanup-mode paredit-everywhere
+              inferior-islisp inf-ruby enh-ruby-mode ruby-electric modus-themes
+              geiser-gauche dired-rainbow tree-sitter tree-sitter-indent
+              tree-sitter-langs elpher csv-mode cmake-mode cmake-project
+              yaml-mode grep-a-lot paredit git-walktree glsl-mode ace-window
+              diredfl ada-mode ada-ref-man ag dired-quick-sort git-timemachine
+              farmhouse-theme erlang flycheck-pycheckers flycheck-pyflakes elpy
+              htmlize lua-mode abyss-theme dylan-mode julia-shell geiser gopher
+              markdown-mode haskell-mode))
  '(pdf-view-midnight-colors '("#ffffff" . "#100f10"))
  '(pop-up-windows t)
  '(pos-tip-tab-width 4)
@@ -167,73 +237,57 @@
  '(rustic-lsp-client nil)
  '(rustic-lsp-setup-p nil)
  '(safe-local-variable-values
-   '((Package . DRAKMA)
-     (Package . FLEXI-STREAMS)
-     (diff-add-log-use-relative-names . t)
-     (vc-git-annotate-switches . "-w")
+   '((Package . CL-PPCRE) (Package . DRAKMA) (Package . FLEXI-STREAMS)
+     (diff-add-log-use-relative-names . t) (vc-git-annotate-switches . "-w")
      (eval cl-flet
-           ((enhance-imenu-lisp
-             (&rest keywords)
-             (dolist
-                 (keyword keywords)
-               (add-to-list 'lisp-imenu-generic-expression
-                            (list
-                             (purecopy
-                              (concat
-                               (capitalize keyword)
-                               (if
-                                   (string=
-                                    (substring-no-properties keyword -1)
-                                    "s")
-                                   "es" "s")))
-                             (purecopy
-                              (concat "^\\s-*("
-                                      (regexp-opt
-                                       (list
-                                        (concat "define-" keyword))
-                                       t)
-                                      "\\s-+\\(" lisp-mode-symbol-regexp "\\)"))
-                             2)))))
-           (enhance-imenu-lisp "bookmarklet-command" "class" "command" "ffi-method" "function" "mode" "parenscript" "user-class"))
-     (Package . CCL)
-     (Package . CL-USER)
-     (Syntax . COMMON-LISP)
-     (Syntax . Common-lisp)
-     (package . CL-GDAL)
-     (Package . CLIM-GUI)
-     (Package . URL)
-     (Readtable . GLISP)
-     (Encoding . utf-8)
-     (Package . RENDERER)
-     (Package . CLOSURE/CLIM-DEVICE)
-     (Package . CLIM-INTERNALS)
-     (Syntax . Common-Lisp)
-     (Lowercase . Yes)
-     (Base . 10)
-     (Package . CLIM-DEMO)
+           ((enhance-imenu-lisp (&rest keywords)
+                                (dolist (keyword keywords)
+                                  (add-to-list 'lisp-imenu-generic-expression
+                                               (list
+                                                (purecopy
+                                                 (concat (capitalize keyword)
+                                                         (if
+                                                             (string=
+                                                              (substring-no-properties
+                                                               keyword -1)
+                                                              "s")
+                                                             "es"
+                                                           "s")))
+                                                (purecopy
+                                                 (concat "^\\s-*("
+                                                         (regexp-opt
+                                                          (list
+                                                           (concat "define-"
+                                                                   keyword))
+                                                          t)
+                                                         "\\s-+\\("
+                                                         lisp-mode-symbol-regexp
+                                                         "\\)"))
+                                                2)))))
+           (enhance-imenu-lisp "bookmarklet-command" "class" "command"
+                               "ffi-method" "function" "mode" "parenscript"
+                               "user-class"))
+     (Package . CCL) (Package . CL-USER) (Syntax . COMMON-LISP)
+     (Syntax . Common-lisp) (package . CL-GDAL) (Package . CLIM-GUI)
+     (Package . URL) (Readtable . GLISP) (Encoding . utf-8) (Package . RENDERER)
+     (Package . CLOSURE/CLIM-DEVICE) (Package . CLIM-INTERNALS)
+     (Syntax . Common-Lisp) (Lowercase . Yes) (Base . 10) (Package . CLIM-DEMO)
      (Syntax . ANSI-Common-Lisp)))
  '(savehist-additional-variables '(search-ring regexp-search-ring))
  '(savehist-mode t)
  '(scroll-bar-mode nil)
  '(shell-file-name "zsh")
- '(slime-auto-start 'ask)
- '(slime-completion-at-point-functions
-   '(slime-c-p-c-completion-at-point slime-filename-completion slime-simple-completion-at-point))
  '(slime-enable-evaluate-in-emacs t)
- '(slime-net-coding-system 'utf-8-unix)
- '(slime-port 4567)
+ '(sly-complete-symbol-function 'sly-simple-completions)
  '(split-width-threshold 120)
  '(sql-connection-alist
-   '(("map-viz Docker PostGIS"
-      (sql-product 'postgres)
-      (sql-user "postgres")
-      (sql-password "postgres")
-      (sql-server "localhost")
-      (sql-database "postgis")
-      (sql-port 54320))))
+   '(("map-viz Docker PostGIS" (sql-product 'postgres) (sql-user "postgres")
+      (sql-password "postgres") (sql-server "localhost")
+      (sql-database "postgis") (sql-port 54320))))
  '(sql-sqlite-program "sqlite3")
  '(tab-width 4)
  '(text-scale-mode-step 1.125)
+ '(tramp-verbose 7)
  '(truncate-lines t)
  '(undo-tree-auto-save-history nil)
  '(undo-tree-history-directory-alist nil)
@@ -241,47 +295,38 @@
  '(vc-annotate-background nil)
  '(vc-annotate-background-mode nil)
  '(vc-annotate-color-map
-   '((20 . "#ff8059")
-     (40 . "#feacd0")
-     (60 . "#f78fe7")
-     (80 . "#f4923b")
-     (100 . "#eecc00")
-     (120 . "#cfdf30")
-     (140 . "#f8dec0")
-     (160 . "#bfebe0")
-     (180 . "#44bc44")
-     (200 . "#80d200")
-     (220 . "#6ae4b9")
-     (240 . "#4ae8fc")
-     (260 . "#00d3d0")
-     (280 . "#c6eaff")
-     (300 . "#2fafff")
-     (320 . "#79a8ff")
-     (340 . "#00bcff")
-     (360 . "#b6a0ff"))))
+   '((20 . "#ff8059") (40 . "#feacd0") (60 . "#f78fe7") (80 . "#f4923b")
+     (100 . "#eecc00") (120 . "#cfdf30") (140 . "#f8dec0") (160 . "#bfebe0")
+     (180 . "#44bc44") (200 . "#80d200") (220 . "#6ae4b9") (240 . "#4ae8fc")
+     (260 . "#00d3d0") (280 . "#c6eaff") (300 . "#2fafff") (320 . "#79a8ff")
+     (340 . "#00bcff") (360 . "#b6a0ff"))))
 
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
- '(default ((t (:inherit nil :extend nil :stipple nil :background "gray14" :foreground "bisque2" :inverse-video nil :box nil :strike-through nil :overline nil :underline nil :slant normal :weight regular :height 120 :width normal :foundry "UKWN" :family "JuliaMono"))))
+ '(default ((t (:inherit nil :extend nil :stipple nil :background "black" :foreground "bisque2" :inverse-video nil :box nil :strike-through nil :overline nil :underline nil :slant normal :weight regular :height 104 :width normal :family "IBM PlexMono"))))
+ '(aw-leading-char-face ((t (:foreground "red" :height 2.0))))
  '(compilation-error ((t (:inherit error :inverse-video nil))))
  '(compilation-mode-line-exit ((t (:inherit compilation-info :background "black" :foreground "ForestGreen" :weight bold))))
  '(compilation-mode-line-fail ((t (:inherit compilation-error :foreground "spring green" :weight bold))))
  '(cursor ((t (:background "#00BBFF" :distant-foreground "green"))))
  '(diff-added ((t (:extend t :foreground "dark olive green" :weight bold))))
  '(error ((t (:foreground "chartreuse"))))
+ '(font-lock-builtin-face ((t (:foreground "hot pink"))))
  '(font-lock-comment-face ((t (:foreground "deep sky blue"))))
+ '(font-lock-function-name-face ((t (:foreground "deep sky blue" :weight bold))))
  '(font-lock-keyword-face ((t (:foreground "olive drab" :weight bold))))
+ '(highlight ((t (:background "magenta" :foreground "white"))))
  '(highlight-indentation-current-column-face ((t (:background "gray17"))))
+ '(lazy-highlight ((t (:background "dark violet" :distant-foreground "white"))))
+ '(magit-diff-added ((t (:extend t :background "dark green" :foreground "black"))))
+ '(magit-diff-added-highlight ((t (:extend t :background "olive drab" :foreground "#cceecc"))))
+ '(magit-section-highlight ((t (:extend t :background "brightyellow"))))
  '(region ((t (:extend t :background "pale green" :foreground "black"))))
  '(shadow ((t (:foreground "dim gray"))))
  '(show-paren-match ((t (:background "green" :foreground "#ffffff"))))
- '(slime-error-face ((t (:underline "red" :height 2.0))))
- '(slime-note-face ((t (:underline (:color "pale green" :style wave :position nil) :height 1.2))))
- '(slime-repl-output-face ((t (:inherit font-lock-string-face :height 0.9))))
- '(slime-warning-face ((t (:underline "orange1" :height 1.4))))
  '(whitespace-indentation ((t (:background "black" :foreground "gray20"))))
  '(whitespace-space ((t nil)))
  '(widget-field ((t (:extend t :box (:line-width (2 . 2) :color "gray" :style pressed-button))))))
@@ -324,9 +369,14 @@
 (global-set-key (kbd "s-<f8>") 'slime-disassemble-definition)
 (global-set-key (kbd "s-<f7>") 'slime-macroexpand-1)
 (global-set-key (kbd "s-<f6>") 'slime-macroexpand-all)
+(global-set-key (kbd "C-x C-/") 'slime-hyperspec-lookup)
+(global-set-key (kbd "s-s") 'slime-selector)
+(global-set-key (kbd "s-t") 'slime-toggle-fancy-trace)
+(global-set-key (kbd "s-3") 'slime-inspect-definition)
+(global-set-key (kbd "s-4") 'slime-inspect-presentation-at-point)
 
 (global-set-key (kbd "s-q") 'eshell)
-(global-set-key (kbd "C-x C-/") 'slime-hyperspec-lookup)
+
 (global-set-key (kbd "C-x k") 'kill-current-buffer)
 (global-set-key (kbd "C-x k") 'kill-current-buffer)
 (global-set-key (kbd "M-l") (lambda () (interactive) (insert-char ?\λ)))
@@ -351,10 +401,6 @@
 (global-set-key (kbd "<f7>") 'magit-log-all)
 (global-set-key (kbd "<f9>") 'undo-tree-visualize)
 (global-set-key (kbd "<f12>") 'ibuffer)
-(global-set-key (kbd "s-s") 'slime-selector)
-(global-set-key (kbd "s-t") 'slime-toggle-fancy-trace)
-(global-set-key (kbd "s-3") 'slime-inspect-definition)
-(global-set-key (kbd "s-4") 'slime-inspect-presentation-at-point)
 
 (global-set-key (kbd "s-u") 'uncomment-region)
 (global-set-key (kbd "s-=") 'recompile)
@@ -364,10 +410,12 @@
 (global-set-key (kbd "<f5>") 'revert-buffer-no-confirm)
 (global-set-key (kbd "<insert>") 'ielm)
 (global-set-key (kbd "M-<space>") 'hippie-expand)
+(global-set-key (kbd "C-x o") 'ace-window)
 
-(add-to-list 'load-path "~/src/lisp/slime/")
-(load "slime-autoloads")
-
+(defun to-compile ()
+  (interactive)
+  (switch-to-buffer-other-window "*compilation*"))
+(global-set-key (kbd "<f11>") 'to-compile)
 (setf slime-lisp-implementations
       '((sbcl ;; Normal SBCL
          ("/usr/local/bin/sbcl" "--noinform --control-stack-size 4 --merge-core-pages")
@@ -379,6 +427,10 @@
 
         (strace-sbcl ;; Benchmarking SBCL
          ("strace" "/usr/local/bin/sbcl" "--noinform --control-stack-size 4 --merge-core-pages")
+         :coding-system utf-8-unix)
+
+        (gdb-sbcl ;; Benchmarking SBCL
+         ("gdn" "/usr/local/bin/sbcl" "--noinform --control-stack-size 4 --merge-core-pages")
          :coding-system utf-8-unix)
 
         (nvprof-sbcl ;; Benchmarking SBCL
@@ -402,14 +454,16 @@
          :coding-system utf-8-unix)))
 
 
-(slime-setup '(slime-fancy
+(slime-setup '(
+               slime-fancy
                slime-mrepl
                slime-tramp
                slime-sprof
                slime-c-p-c
                slime-fancy-inspector
                slime-mdot-fu
-               slime-trace-dialog))
+               slime-trace-dialog
+               ))
 
 (setq slime-default-lisp 'sbcl)
 (setq slime-description-autofocus t)
@@ -417,6 +471,18 @@
 (setf slime-scratch-file (expand-file-name "~/.slime-scratch.lisp"))
 
 (global-set-key (kbd "s-s") 'slime-selector)
+
+;; (add-hook 'sldb-mode-hook
+;;           (lambda ()
+;;             (define-key sldb-mode-map (kbd "<up>") 'sldb-details-up)
+;;             (define-key sldb-mode-map (kbd "<down>") 'sldb-details-down)))
+
+(add-hook 'slime-mode-hook
+          (lambda ()
+            (kbd "M-<space>" 'hippie-expand)))
+
+
+
 
 ;; (add-to-list 'load-path "~/src/lisp/sly/")
 ;; (require 'sly-autoloads)
@@ -524,13 +590,20 @@ Version 2018-12-23"
 
 (add-hook 'prog-mode-hook 'paredit-everywhere-mode)
 
-(add-hook 'prog-mode-hook 'highlight-indentation-current-column-mode)
+(add-hook 'compilation-filter-hook 'ansi-color-compilation-filter)
 
 (defun my/turn-on-hl-line-mode ()
   (hl-line-mode 1))
-(add-hook 'compilation-mode-hook #'my/turn-on-hl-line-mode)
+
 (defun my/update-compilation-hl-line ()
   (with-current-buffer next-error-last-buffer
     (when hl-line-mode (hl-line-highlight))))
+
+(defun open-laptop ()
+  (interactive)
+  (find-file "/ssh::jeremiah@2601:280:5c80:c930:6203:8ff:fea6:c13e"))
+
+(add-hook 'compilation-mode-hook #'my/turn-on-hl-line-mode)
 (add-hook 'next-error-hook 'my/update-compilation-hl-line)
+
 

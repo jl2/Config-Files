@@ -84,7 +84,9 @@ echo "* Updating Emacs"
 echo "********************************************************************************"
 git checkout master
 git pull
-make distclean
+sudo make distclean
+git clean -xdf
+./autogen.sh
 ./configure --with-x-toolkit=lucid \
             --with-native-compilation \
             --with-libsystemd \
@@ -105,8 +107,8 @@ sudo make install
 echo "********************************************************************************"
 echo "* Restarting Emacs"
 echo "********************************************************************************"
-systemctl --user restart emacs.service
-emacsclient --quiet --no-wait --reuse-frame --display=:0.0
+# systemctl --user restart emacs.service
+# emacsclient --quiet --no-wait --reuse-frame --display=:0.0
 
 # Update Slime
 cd $LISP_DIR/slime
@@ -116,6 +118,7 @@ echo "**************************************************************************
 git fetch --all
 git pull origin master
 make clean
+git clean -xdf
 make
 
 # Update CCL

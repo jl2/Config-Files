@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 
-ps ax | grep /usr/sbin/netExtender | awk '{print $2}' | xargs kill
-killall dhclient
-
+ps ax | grep netExtender | awk '{print $1}' | xargs kill -QUIT
+ps ax | grep pppd | awk '{print $1}' | xargs kill -QUIT
+sudo killall dhclient
+sudo rm -f /etc/resolv.conf
 sudo systemctl start systemd-resolved.service
 

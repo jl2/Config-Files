@@ -9,7 +9,7 @@ old_tmux_win=`tmux display -p \#W`
 tmux rename-window VPN-VPN-VPN-VPN
 export DISPLAY=:0.0
 
-remmina &
+# remmina &
 /usr/sbin/netExtender --username=$VPN_USER \
                       --password=$VPN_PASS \
                       --domain=$VPN_DOMAIN \
